@@ -6,8 +6,10 @@ go:
   - 1.7.3
   - tip
 
-sudo: false
-
 install:
-  - go get github.com/Masterminds/glide
+  - mkdir -p $GOPATH/bin
+  - curl https://glide.sh/get | sh
+  - glide install
+
+script:
   - GO15VENDOREXPERIMENT=1 go build
