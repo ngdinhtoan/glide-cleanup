@@ -1,0 +1,7 @@
+package: github.com/ngdinhtoan/glide-cleanup
+import:
+- package: github.com/Masterminds/glide
+  version: ~0.12.3
+  subpackages:
+  - cfg
+  - msg
