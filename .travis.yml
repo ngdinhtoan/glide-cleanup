@@ -13,3 +13,4 @@ install:
 
 script:
   - GO15VENDOREXPERIMENT=1 go build
+  - glide --debug cleanup
