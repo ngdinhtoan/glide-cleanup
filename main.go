@@ -106,9 +106,13 @@ gi:
 	}
 
 	logger.Verbose("Removing unused packages...")
-	for pkg := range unusedPkgs {
-		glideConfig.Imports = glideConfig.Imports.Remove(pkg)
+	deps := make([]*cfg.Dependency, 0, len(glideConfig.Imports))
+	for _, pkg := range glideConfig.Imports {
+		if _, unused := unusedPkgs[pkg.Name]; !unused {
+			deps = append(deps, pkg)
+		}
 	}
+	glideConfig.Imports = deps
 
 	if err = glideConfig.WriteFile(glideYaml); err != nil {
 		logger.Die("Error while write Glide config to file back: %v", err)
