@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/ngdinhtoan/glide-cleanup.svg?branch=master)](https://travis-ci.org/ngdinhtoan/glide-cleanup)
 
-Removing unused packages from the `glide.yaml` file
+A [Glide](https://www.glide.sh/)'s plugin that removes unused packages from the `glide.yaml` file
 
 ## Install
 
