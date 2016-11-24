@@ -9,39 +9,41 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Masterminds/glide/action"
 	"github.com/Masterminds/glide/cfg"
 	"github.com/Masterminds/glide/msg"
+	gpath "github.com/Masterminds/glide/path"
 )
 
 var (
-	glideYaml = "glide.yaml"
-	logger    = msg.NewMessenger()
+	glideYaml  = gpath.DefaultGlideFile
+	argDebug   = false
+	argVerbose = false
+	argQuiet   = false
 )
 
 func init() {
-	flag.StringVar(&glideYaml, "yaml", "glide.yaml", "Set a YAML configuration file")
-	flag.BoolVar(&logger.IsVerbose, "verbose", false, "Print more verbose informational messages")
-	flag.BoolVar(&logger.IsDebugging, "debug", false, "Print debug verbose informational messages")
-	flag.BoolVar(&logger.Quiet, "quiet", false, "Quiet (no info or debug messages)")
+	flag.StringVar(&glideYaml, "yaml", gpath.DefaultGlideFile, "Set a YAML configuration file")
+	flag.BoolVar(&argVerbose, "verbose", false, "Print more verbose informational messages")
+	flag.BoolVar(&argDebug, "debug", false, "Print debug verbose informational messages")
+	flag.BoolVar(&argQuiet, "quiet", false, "Quiet (no info or debug messages)")
 }
 
 func main() {
 	flag.Parse()
 
-	if logger.IsDebugging {
-		logger.IsVerbose = true
-	}
+	action.Verbose(argVerbose)
+	action.Debug(argDebug)
+	action.Quiet(argQuiet)
+	gpath.GlideFile = glideYaml
 
 	// load package from glide.yml config
-	logger.Verbose("Loading Glide config from %s...", glideYaml)
-	glideConfig, err := loadGlideConfig(glideYaml)
-	if err != nil {
-		logger.Die("Could not load Glide configuration from glide.yaml file: %v", err)
-	}
+	msg.Verbose("Loading Glide config from %s...", glideYaml)
+	glideConfig := loadGlideConfig()
 
-	logger.Verbose("Collecting imported packages...")
+	msg.Verbose("Collecting imported packages...")
 	importPkgs := make(map[string]interface{})
-	err = filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			if path == "vendor" {
 				return filepath.SkipDir
@@ -62,24 +64,24 @@ func main() {
 			return nil
 		}
 
-		logger.Debug("--> getting import package in %q", path)
+		msg.Debug("--> getting import package in %q", path)
 		pkgs, err := getImports(path)
 		if err == nil {
 			for _, pkg := range pkgs {
 				importPkgs[pkg] = nil
 			}
 		} else {
-			logger.Err("Error when get import package for file %v: %v", path, err)
+			msg.Err("Error when get import package for file %v: %v", path, err)
 		}
 
 		return nil
 	})
 
 	if err != nil {
-		logger.Die(err.Error())
+		msg.Die(err.Error())
 	}
 
-	logger.Verbose("Checking unused packages...")
+	msg.Verbose("Checking unused packages...")
 	unusedPkgs := make(map[string]interface{})
 gi:
 	for _, dep := range glideConfig.Imports {
@@ -96,16 +98,16 @@ gi:
 			}
 		}
 
-		logger.Debug("--> package %q is not used", dep.Name)
+		msg.Debug("--> package %q is not used", dep.Name)
 		unusedPkgs[dep.Name] = nil
 	}
 
 	if len(unusedPkgs) == 0 {
-		logger.Info("Well done! All packages are needed.")
+		msg.Info("Well done! All packages are needed.")
 		os.Exit(0)
 	}
 
-	logger.Verbose("Removing unused packages...")
+	msg.Verbose("Removing unused packages...")
 	deps := make([]*cfg.Dependency, 0, len(glideConfig.Imports))
 	for _, pkg := range glideConfig.Imports {
 		if _, unused := unusedPkgs[pkg.Name]; !unused {
@@ -114,21 +116,30 @@ gi:
 	}
 	glideConfig.Imports = deps
 
-	if err = glideConfig.WriteFile(glideYaml); err != nil {
-		logger.Die("Error while write Glide config to file back: %v", err)
+	glideYamlFile, _ := gpath.Glide()
+	if err = glideConfig.WriteFile(glideYamlFile); err != nil {
+		msg.Die("Error while write Glide config to file back: %v", err)
 	}
 
-	logger.Info("New Glide config has been updated with removing unused packages.")
+	msg.Info("New Glide config has been updated with removing unused packages.")
 }
 
-func loadGlideConfig(file string) (config *cfg.Config, err error) {
-	var yml []byte
-
-	if yml, err = ioutil.ReadFile(file); err != nil {
-		return nil, err
+func loadGlideConfig() (config *cfg.Config) {
+	glideYamlFile, err := gpath.Glide()
+	if err != nil {
+		msg.Die("Could not find Glide config file")
 	}
 
-	return cfg.ConfigFromYaml(yml)
+	var yml []byte
+	if yml, err = ioutil.ReadFile(glideYamlFile); err != nil {
+		msg.Die("Error while reading config file: %v", err)
+	}
+
+	if config, err = cfg.ConfigFromYaml(yml); err != nil {
+		msg.Die("Error while parsing config file: %v", err)
+	}
+
+	return config
 }
 
 func getImports(file string) ([]string, error) {
