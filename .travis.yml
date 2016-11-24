@@ -9,8 +9,7 @@ go:
 install:
   - mkdir -p $GOPATH/bin
   - curl https://glide.sh/get | sh
-  - glide install
 
 script:
   - GO15VENDOREXPERIMENT=1 go build
-  - glide --debug cleanup
+  - glide cleanup --debug
