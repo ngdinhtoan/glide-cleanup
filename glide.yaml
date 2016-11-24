@@ -3,5 +3,9 @@ import:
 - package: github.com/Masterminds/glide
   version: ~0.12.3
   subpackages:
+  - action
   - cfg
   - msg
+  - path
+- package: gopkg.in/yaml.v2
+  version: a5b47d31c556af34a302ce5d659e6fea44d90de0
