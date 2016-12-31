@@ -1,4 +1,10 @@
 package: github.com/ngdinhtoan/glide-cleanup
+homepage: https://ngdinhtoan.github.io/glidecleanup/
+license: MIT
+owners:
+- name: Toan Nguyen
+  email: ngdinhtoan@gmail.com
+  homepage: https://ngdinhtoan.github.io/
 import:
 - package: github.com/Masterminds/glide
   version: ~0.12.3
