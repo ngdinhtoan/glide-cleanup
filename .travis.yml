@@ -1,10 +1,9 @@
 language: go
 
 go:
-  - 1.5.x
-  - 1.6.x
   - 1.7.x
   - 1.8.x
+  - 1.9.x
   - tip
 
 # Use container-based infrastructure
@@ -15,5 +14,5 @@ install:
   - curl https://glide.sh/get | sh
 
 script:
-  - GO15VENDOREXPERIMENT=1 go build
+  - go build
   - glide cleanup --debug
