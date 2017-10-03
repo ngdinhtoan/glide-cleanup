@@ -1,6 +1,8 @@
 package semver
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
 )
 
@@ -224,6 +226,11 @@ func TestGreaterThan(t *testing.T) {
 		{"1.2.3", "1.5.1", false},
 		{"2.2.3", "1.5.1", true},
 		{"3.2-beta", "3.2-beta", false},
+		{"3.2.0-beta.1", "3.2.0-beta.5", false},
+		{"3.2-beta.4", "3.2-beta.2", true},
+		{"7.43.0-SNAPSHOT.99", "7.43.0-SNAPSHOT.103", false},
+		{"7.43.0-SNAPSHOT.FOO", "7.43.0-SNAPSHOT.103", true},
+		{"7.43.0-SNAPSHOT.99", "7.43.0-SNAPSHOT.BAR", false},
 	}
 
 	for _, tc := range tests {
@@ -279,5 +286,202 @@ func TestEqual(t *testing.T) {
 				tc.v1, tc.v2, e, a,
 			)
 		}
+	}
+}
+
+func TestInc(t *testing.T) {
+	tests := []struct {
+		v1               string
+		expected         string
+		how              string
+		expectedOriginal string
+	}{
+		{"1.2.3", "1.2.4", "patch", "1.2.4"},
+		{"v1.2.4", "1.2.5", "patch", "v1.2.5"},
+		{"1.2.3", "1.3.0", "minor", "1.3.0"},
+		{"v1.2.4", "1.3.0", "minor", "v1.3.0"},
+		{"1.2.3", "2.0.0", "major", "2.0.0"},
+		{"v1.2.4", "2.0.0", "major", "v2.0.0"},
+		{"1.2.3+meta", "1.2.4", "patch", "1.2.4"},
+		{"1.2.3-beta+meta", "1.2.3", "patch", "1.2.3"},
+		{"v1.2.4-beta+meta", "1.2.4", "patch", "v1.2.4"},
+		{"1.2.3-beta+meta", "1.3.0", "minor", "1.3.0"},
+		{"v1.2.4-beta+meta", "1.3.0", "minor", "v1.3.0"},
+		{"1.2.3-beta+meta", "2.0.0", "major", "2.0.0"},
+		{"v1.2.4-beta+meta", "2.0.0", "major", "v2.0.0"},
+	}
+
+	for _, tc := range tests {
+		v1, err := NewVersion(tc.v1)
+		if err != nil {
+			t.Errorf("Error parsing version: %s", err)
+		}
+		var v2 Version
+		switch tc.how {
+		case "patch":
+			v2 = v1.IncPatch()
+		case "minor":
+			v2 = v1.IncMinor()
+		case "major":
+			v2 = v1.IncMajor()
+		}
+
+		a := v2.String()
+		e := tc.expected
+		if a != e {
+			t.Errorf(
+				"Inc %q failed. Expected %q got %q",
+				tc.how, e, a,
+			)
+		}
+
+		a = v2.Original()
+		e = tc.expectedOriginal
+		if a != e {
+			t.Errorf(
+				"Inc %q failed. Expected original %q got %q",
+				tc.how, e, a,
+			)
+		}
+	}
+}
+
+func TestSetPrerelease(t *testing.T) {
+	tests := []struct {
+		v1                 string
+		prerelease         string
+		expectedVersion    string
+		expectedPrerelease string
+		expectedOriginal   string
+		expectedErr        error
+	}{
+		{"1.2.3", "**", "1.2.3", "", "1.2.3", ErrInvalidPrerelease},
+		{"1.2.3", "beta", "1.2.3-beta", "beta", "1.2.3-beta", nil},
+		{"v1.2.4", "beta", "1.2.4-beta", "beta", "v1.2.4-beta", nil},
+	}
+
+	for _, tc := range tests {
+		v1, err := NewVersion(tc.v1)
+		if err != nil {
+			t.Errorf("Error parsing version: %s", err)
+		}
+
+		v2, err := v1.SetPrerelease(tc.prerelease)
+		if err != tc.expectedErr {
+			t.Errorf("Expected to get err=%s, but got err=%s", tc.expectedErr, err)
+		}
+
+		a := v2.Prerelease()
+		e := tc.expectedPrerelease
+		if a != e {
+			t.Errorf("Expected prerelease value=%q, but got %q", e, a)
+		}
+
+		a = v2.String()
+		e = tc.expectedVersion
+		if a != e {
+			t.Errorf("Expected version string=%q, but got %q", e, a)
+		}
+
+		a = v2.Original()
+		e = tc.expectedOriginal
+		if a != e {
+			t.Errorf("Expected version original=%q, but got %q", e, a)
+		}
+	}
+}
+
+func TestSetMetadata(t *testing.T) {
+	tests := []struct {
+		v1               string
+		metadata         string
+		expectedVersion  string
+		expectedMetadata string
+		expectedOriginal string
+		expectedErr      error
+	}{
+		{"1.2.3", "**", "1.2.3", "", "1.2.3", ErrInvalidMetadata},
+		{"1.2.3", "meta", "1.2.3+meta", "meta", "1.2.3+meta", nil},
+		{"v1.2.4", "meta", "1.2.4+meta", "meta", "v1.2.4+meta", nil},
+	}
+
+	for _, tc := range tests {
+		v1, err := NewVersion(tc.v1)
+		if err != nil {
+			t.Errorf("Error parsing version: %s", err)
+		}
+
+		v2, err := v1.SetMetadata(tc.metadata)
+		if err != tc.expectedErr {
+			t.Errorf("Expected to get err=%s, but got err=%s", tc.expectedErr, err)
+		}
+
+		a := v2.Metadata()
+		e := tc.expectedMetadata
+		if a != e {
+			t.Errorf("Expected metadata value=%q, but got %q", e, a)
+		}
+
+		a = v2.String()
+		e = tc.expectedVersion
+		if e != a {
+			t.Errorf("Expected version string=%q, but got %q", e, a)
+		}
+
+		a = v2.Original()
+		e = tc.expectedOriginal
+		if a != e {
+			t.Errorf("Expected version original=%q, but got %q", e, a)
+		}
+	}
+}
+
+func TestOriginalVPrefix(t *testing.T) {
+	tests := []struct {
+		version string
+		vprefix string
+	}{
+		{"1.2.3", ""},
+		{"v1.2.4", "v"},
+	}
+
+	for _, tc := range tests {
+		v1, _ := NewVersion(tc.version)
+		a := v1.originalVPrefix()
+		e := tc.vprefix
+		if a != e {
+			t.Errorf("Expected vprefix=%q, but got %q", e, a)
+		}
+	}
+}
+
+func TestJsonMarshal(t *testing.T) {
+	sVer := "1.1.1"
+	x, err := NewVersion(sVer)
+	if err != nil {
+		t.Errorf("Error creating version: %s", err)
+	}
+	out, err2 := json.Marshal(x)
+	if err2 != nil {
+		t.Errorf("Error marshaling version: %s", err2)
+	}
+	got := string(out)
+	want := fmt.Sprintf("%q", sVer)
+	if got != want {
+		t.Errorf("Error marshaling unexpected marshaled content: got=%q want=%q", got, want)
+	}
+}
+
+func TestJsonUnmarshal(t *testing.T) {
+	sVer := "1.1.1"
+	ver := &Version{}
+	err := json.Unmarshal([]byte(fmt.Sprintf("%q", sVer)), ver)
+	if err != nil {
+		t.Errorf("Error unmarshaling version: %s", err)
+	}
+	got := ver.String()
+	want := sVer
+	if got != want {
+		t.Errorf("Error unmarshaling unexpected object content: got=%q want=%q", got, want)
 	}
 }

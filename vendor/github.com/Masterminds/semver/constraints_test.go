@@ -72,6 +72,11 @@ func TestConstraintCheck(t *testing.T) {
 		{"<=1.1", "0.1.0", true},
 		{"<=1.1", "1.1.0", true},
 		{"<=1.1", "1.1.1", false},
+		{">0", "0.0.1-alpha", true},
+		{">=0", "0.0.1-alpha", true},
+		{">0", "0", false},
+		{">=0", "0", true},
+		{"=0", "1", false},
 	}
 
 	for _, tc := range tests {
@@ -89,7 +94,7 @@ func TestConstraintCheck(t *testing.T) {
 
 		a := c.check(v)
 		if a != tc.check {
-			t.Errorf("Constraint '%s' failing", tc.constraint)
+			t.Errorf("Constraint %q failing with %q", tc.constraint, tc.version)
 		}
 	}
 }
@@ -103,12 +108,13 @@ func TestNewConstraint(t *testing.T) {
 	}{
 		{">= 1.1", 1, 1, false},
 		{"2.0", 1, 1, false},
+		{"v2.3.5-20161202202307-sha.e8fc5e5", 1, 1, false},
 		{">= bar", 0, 0, true},
 		{">= 1.2.3, < 2.0", 1, 2, false},
 		{">= 1.2.3, < 2.0 || => 3.0, < 4", 2, 2, false},
 
-		// The 3-4 should be broken into 2 by the range rewriting
-		{"3-4 || => 3.0, < 4", 2, 2, false},
+		// The 3 - 4 should be broken into 2 by the range rewriting
+		{"3 - 4 || => 3.0, < 4", 2, 2, false},
 	}
 
 	for _, tc := range tests {
@@ -146,6 +152,11 @@ func TestConstraintsCheck(t *testing.T) {
 	}{
 		{"*", "1.2.3", true},
 		{"~0.0.0", "1.2.3", true},
+		{"0.x.x", "1.2.3", false},
+		{"0.0.x", "1.2.3", false},
+		{"0.0.0", "1.2.3", false},
+		{"*", "1.2.3", true},
+		{"^0.0.0", "1.2.3", false},
 		{"= 2.0", "1.2.3", false},
 		{"= 2.0", "2.0.0", true},
 		{"4.1", "4.1.0", true},
@@ -199,6 +210,9 @@ func TestConstraintsCheck(t *testing.T) {
 		{"^1.1.2-alpha", "1.2.1-beta1", true},
 		{"^1.2.x-alpha", "1.1.1-beta1", false},
 		{"~*", "2.1.1", true},
+		{"~1", "2.1.1", false},
+		{"~1", "1.3.5", true},
+		{"~1", "1.4", true},
 		{"~1.x", "2.1.1", false},
 		{"~1.x", "1.3.5", true},
 		{"~1.x", "1.4", true},
@@ -239,9 +253,9 @@ func TestRewriteRange(t *testing.T) {
 		c  string
 		nc string
 	}{
-		{"2-3", ">= 2, <= 3"},
-		{"2-3, 2-3", ">= 2, <= 3,>= 2, <= 3"},
-		{"2-3, 4.0.0-5.1", ">= 2, <= 3,>= 4.0.0, <= 5.1"},
+		{"2 - 3", ">= 2, <= 3"},
+		{"2 - 3, 2 - 3", ">= 2, <= 3,>= 2, <= 3"},
+		{"2 - 3, 4.0.0 - 5.1", ">= 2, <= 3,>= 4.0.0, <= 5.1"},
 	}
 
 	for _, tc := range tests {
@@ -329,6 +343,9 @@ func TestConstraintsValidate(t *testing.T) {
 		{"^2.x", "1.1.1", false},
 		{"^1.x", "2.1.1", false},
 		{"~*", "2.1.1", true},
+		{"~1", "2.1.1", false},
+		{"~1", "1.3.5", true},
+		{"~1", "1.3.5-beta", false},
 		{"~1.x", "2.1.1", false},
 		{"~1.x", "1.3.5", true},
 		{"~1.x", "1.3.5-beta", false},
@@ -360,7 +377,7 @@ func TestConstraintsValidate(t *testing.T) {
 		a, msgs := c.Validate(v)
 		if a != tc.check {
 			t.Errorf("Constraint '%s' failing with '%s'", tc.constraint, tc.version)
-		} else if a == false && len(msgs) == 0 {
+		} else if !a && len(msgs) == 0 {
 			t.Errorf("%q failed with %q but no errors returned", tc.constraint, tc.version)
 		}
 
@@ -414,10 +431,11 @@ func TestConstraintsValidate(t *testing.T) {
 		{">=1.1, <2, !=1.2.3", "1.2.3", "1.2.3 is equal to 1.2.3"},
 		{">=1.1, <2, !=1.2.3 || > 3", "3.0.0", "3.0.0 is greater than or equal to 2"},
 		{">=1.1, <2, !=1.2.3 || > 3", "1.2.3", "1.2.3 is equal to 1.2.3"},
-		{"1.1-3", "4.3.2", "4.3.2 is greater than 3"},
+		{"1.1 - 3", "4.3.2", "4.3.2 is greater than 3"},
 		{"^1.1", "4.3.2", "4.3.2 does not have same major version as 1.1"},
 		{"^2.x", "1.1.1", "1.1.1 does not have same major version as 2.x"},
 		{"^1.x", "2.1.1", "2.1.1 does not have same major version as 1.x"},
+		{"~1", "2.1.2", "2.1.2 does not have same major and minor version as 1"},
 		{"~1.x", "2.1.1", "2.1.1 does not have same major and minor version as 1.x"},
 		{"~1.2.3", "1.2.2", "1.2.2 does not have same major and minor version as 1.2.3"},
 		{"~1.2.3", "1.3.2", "1.3.2 does not have same major and minor version as 1.2.3"},

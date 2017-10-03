@@ -12,7 +12,23 @@ containing dependent packages for the project. These vendor packages can be
 installed by a tool (e.g. glide), similar to `go get` or they can be vendored and
 distributed with the package.
 
-[![Build Status](https://travis-ci.org/Masterminds/glide.svg)](https://travis-ci.org/Masterminds/glide) [![Go Report Card](https://goreportcard.com/badge/github.com/Masterminds/glide)](https://goreportcard.com/report/github.com/Masterminds/glide) [![GoDoc](https://godoc.org/github.com/Masterminds/glide?status.svg)](https://godoc.org/github.com/Masterminds/glide) [![Documentation Status](https://readthedocs.org/projects/glide/badge/?version=stable)](http://glide.readthedocs.org/en/stable/?badge=stable) [![Documentation Status](https://readthedocs.org/projects/glide/badge/?version=latest)](http://glide.readthedocs.org/en/latest/?badge=latest) [![Join the chat at https://gitter.im/Masterminds/glide](https://badges.gitter.im/Masterminds/glide.svg)](https://gitter.im/Masterminds/glide?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/Masterminds/glide.svg)](https://travis-ci.org/Masterminds/glide)
+[![Build status](https://ci.appveyor.com/api/projects/status/3pl4ytgdlfj852li?svg=true&passingText=windows%20build%20passing&failingText=windows%20build%20failing)](https://ci.appveyor.com/project/mattfarina/glide-a8xtg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Masterminds/glide)](https://goreportcard.com/report/github.com/Masterminds/glide) [![GoDoc](https://godoc.org/github.com/Masterminds/glide?status.svg)](https://godoc.org/github.com/Masterminds/glide) [![Documentation Status](https://readthedocs.org/projects/glide/badge/?version=stable)](http://glide.readthedocs.org/en/stable/?badge=stable) [![Documentation Status](https://readthedocs.org/projects/glide/badge/?version=latest)](http://glide.readthedocs.org/en/latest/?badge=latest) [![Join the chat at https://gitter.im/Masterminds/glide](https://badges.gitter.im/Masterminds/glide.svg)](https://gitter.im/Masterminds/glide?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+### Golang Dep
+
+An [official package manager](https://github.com/golang/dep) has been started for
+the Go community. We view this as a good thing to bring everyone together around
+one solution. It's currently pre-alpha so it's not ready for prime time usage.
+
+If you start to poke it you'll see it has a similar style to Glide. While commands
+may have different names there are many of the same features such as semantic versions
+and ranges.
+
+Our view is that Glide will be around until an official package manager is ready
+for production use by the masses. We support the common tool and look forward to
+the day it is capable of replacing Glide.
 
 ### Features
 
@@ -57,7 +73,7 @@ regenerates the dependency versions using scanning and rules, and `glide install
 will install the versions listed in the `glide.lock` file, skipping scanning,
 unless the `glide.lock` file is not found in which case it will perform an update.
 
-A projects is structured like this:
+A project is structured like this:
 
 ```
 - $GOPATH/src/myProject (Your project)
@@ -97,14 +113,18 @@ On Mac OS X you can also install the latest release via [Homebrew](https://githu
 $ brew install glide
 ```
 
-On Ubuntu Precise(12.04), Trusty (14.04), Wily (15.10) or Xenial (16.04) you can install from our PPA:
+On Ubuntu Precise (12.04), Trusty (14.04), Wily (15.10) or Xenial (16.04) you can install from our PPA:
 
 ```
 sudo add-apt-repository ppa:masterminds/glide && sudo apt-get update
 sudo apt-get install glide
 ```
 
+On Ubuntu Zesty (17.04) the package is called `golang-glide`.
+
 [Binary packages](https://github.com/Masterminds/glide/releases) are available for Mac, Linux and Windows.
+
+For a development version it is also possible to `go get github.com/Masterminds/glide`.
 
 To build from source you can:
 

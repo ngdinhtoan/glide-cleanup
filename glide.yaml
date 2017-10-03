@@ -7,7 +7,7 @@ owners:
   homepage: https://ngdinhtoan.github.io/
 import:
 - package: github.com/Masterminds/glide
-  version: ~0.12.3
+  version: ~0.13.0
   subpackages:
   - action
   - cfg

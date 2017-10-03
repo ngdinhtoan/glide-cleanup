@@ -1,6 +1,6 @@
 // Glide is a command line utility that manages Go project dependencies.
 //
-// Configureation of where to start is managed via a glide.yaml in the root of a
+// Configuration of where to start is managed via a glide.yaml in the root of a
 // project. The yaml
 //
 // A glide.yaml file looks like:
@@ -34,7 +34,7 @@ import (
 	"os"
 )
 
-var version = "0.12.0-dev"
+var version = "0.13.0-dev"
 
 const usage = `Vendor Package Management for your Go projects.
 
@@ -72,11 +72,6 @@ func main() {
 			Usage: "Quiet (no info or debug messages)",
 		},
 		cli.BoolFlag{
-			Name:   "verbose",
-			Usage:  "Print detailed informational messages",
-			Hidden: true,
-		},
-		cli.BoolFlag{
 			Name:  "debug",
 			Usage: "Print debug verbose informational messages",
 		},
@@ -111,7 +106,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// If there was a Error message exit non-zero.
+	// If there was an Error message exit non-zero.
 	if msg.HasErrored() {
 		m := msg.Color(msg.Red, "An Error has occurred")
 		msg.Msg(m)
@@ -175,7 +170,7 @@ func commands() []cli.Command {
    and versions to fetch. If those are not available the dependent packages will
    be fetched as either a version specified elsewhere or the latest version.
 
-   When adding a new dependency Glide will perform an update to work out the
+   When adding a new dependency Glide will perform an update to work out
    the versions for the dependencies of this dependency (transitive ones). This
    will generate an updated glide.lock file with specific locked versions to use.
 
@@ -191,7 +186,7 @@ func commands() []cli.Command {
 				},
 				cli.BoolFlag{
 					Name:  "insecure",
-					Usage: "Use http:// rather than https:// to retrieve pacakges.",
+					Usage: "Use http:// rather than https:// to retrieve packages.",
 				},
 				cli.BoolFlag{
 					Name:  "no-recursive, quick",
@@ -255,7 +250,7 @@ func commands() []cli.Command {
 					msg.Warn("The --update-vendored flag is deprecated. This now works by default.")
 				}
 				if c.String("file") != "" {
-					msg.Warn("The --flag flag is deprecated.")
+					msg.Warn("The --file flag is deprecated.")
 				}
 				if c.Bool("cache") {
 					msg.Warn("The --cache flag is deprecated. This now works by default.")
@@ -277,7 +272,7 @@ func commands() []cli.Command {
 
 				if c.Bool("resolve-current") {
 					util.ResolveCurrent = true
-					msg.Warn("Only resolving dependencies for the current OS/Arch")
+					msg.Warn("Only resolving dependencies for the current OS/Arch.")
 				}
 
 				inst := repo.NewInstaller()
@@ -428,8 +423,8 @@ Example:
 			Name:      "install",
 			ShortName: "i",
 			Usage:     "Install a project's dependencies",
-			Description: `This uses the native VCS of each packages to install
-   the appropriate version. There are two ways a projects dependencies can
+			Description: `This uses the native VCS of each package to install
+   the appropriate version. There are two ways a project's dependencies can
    be installed. When there is a glide.yaml file defining the dependencies but
    no lock file (glide.lock) the dependencies are installed using the "update"
    command and a glide.lock file is generated pinning all dependencies. If a
@@ -527,7 +522,7 @@ Example:
 
    If a dependency has a glide.yaml file, update will read that file and
    use the information contained there. Those dependencies are maintained in
-   a the top level 'vendor/' directory. 'vendor/foo/bar' will have its
+   the top level 'vendor/' directory. 'vendor/foo/bar' will have its
    dependencies stored in 'vendor/'. This behavior can be disabled with
    '--no-recursive'. When this behavior is skipped a glide.lock file is not
    generated because the full dependency tree cannot be known.
@@ -538,7 +533,7 @@ Example:
 
    The '--strip-vendor' flag will remove any nested 'vendor' folders and
    'Godeps/_workspace' folders after an update (along with undoing any Godep
-   import rewriting). Note, The Godeps specific functionality is deprecated and
+   import rewriting). Note, the Godeps specific functionality is deprecated and
    will be removed when most Godeps users have migrated to using the vendor
    folder.`,
 			Flags: []cli.Flag{
@@ -748,9 +743,9 @@ Example:
    to have a cache for your continuous integration (CI) system or if you want to
    work on a dependency in a local location.
 
-   The mirrors are stored in an mirrors.yaml file in your GLIDE_HOME.
+   The mirrors are stored in a mirrors.yaml file in your GLIDE_HOME.
 
-   The three commands to manager mirrors are 'list', 'set', and 'remove'.
+   The three commands to manage mirrors are 'list', 'set', and 'remove'.
 
    Use 'set' in the form:
 
@@ -810,7 +805,7 @@ Example:
 				{
 					Name:      "remove",
 					ShortName: "rm",
-					Usage:     "Remove an mirror",
+					Usage:     "Remove a mirror",
 					Description: `Use 'remove' in the form:
 
        glide mirror remove [original]
@@ -833,7 +828,6 @@ Example:
 // so it can be used by any Glide command.
 func startup(c *cli.Context) error {
 	action.Debug(c.Bool("debug"))
-	action.Verbose(c.Bool("verbose"))
 	action.NoColor(c.Bool("no-color"))
 	action.Quiet(c.Bool("quiet"))
 	action.Init(c.String("yaml"), c.String("home"))

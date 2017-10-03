@@ -1,10 +1,10 @@
-hash: 3fbd355653d91297368f3c22f38ff6d45f7006e662ebd49743b24868fb248b4f
-updated: 2016-11-24T20:43:42.819758507+07:00
+hash: 3602a894eb3ec1e8ecfd1dd02c1661c71dfd9f63c5d9f00d3a0819fcaaa50456
+updated: 2017-10-03T11:45:11.116168097+07:00
 imports:
 - name: github.com/codegangsta/cli
-  version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
+  version: cfb38830724cc34fedffe9a2a29fb54fa9169cd1
 - name: github.com/Masterminds/glide
-  version: 84607742b10f492430762d038e954236bbaf23f7
+  version: a88a9a6c4eeaac084a90a0cd2ca8a148cbd3ff63
   subpackages:
   - action
   - cache
@@ -23,9 +23,11 @@ imports:
   - tree
   - util
 - name: github.com/Masterminds/semver
-  version: 05d8cdb8a3903439294f8b09561cb72784cb521b
+  version: 517734cc7d6470c0d07130e40fd40bdeb9bcd3fd
 - name: github.com/Masterminds/vcs
-  version: ccb44ce72b68bfe2490856b50261316c8388ac9f
+  version: 6f1c6d150500e452704e9863f68c2559f58616bf
+- name: github.com/mitchellh/go-homedir
+  version: b8bc1bf767474819792c23f32d8286a45736f1c6
 - name: gopkg.in/yaml.v2
   version: a5b47d31c556af34a302ce5d659e6fea44d90de0
 testImports: []

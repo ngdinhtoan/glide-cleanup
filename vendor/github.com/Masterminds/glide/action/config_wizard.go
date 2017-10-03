@@ -204,10 +204,13 @@ func wizardAskRange(ver *semver.Version, d *cfg.Dependency) string {
 	vstr := ver.String()
 	msg.Info("The package %s appears to use semantic versions (http://semver.org).", d.Name)
 	msg.Info("Would you like to track the latest minor or patch releases (major.minor.patch)?")
-	msg.Info("Tracking minor version releases would use '>= %s, < %d.0.0' ('^%s'). Tracking patch version", vstr, ver.Major()+1, vstr)
-	msg.Info("releases would use '>= %s, < %d.%d.0' ('~%s'). For more information on Glide versions", vstr, ver.Major(), ver.Minor()+1, vstr)
-	msg.Info("and ranges see https://glide.sh/docs/versions")
+	msg.Info("The choices are:")
+	msg.Info(" - Tracking minor version releases would use '>= %s, < %d.0.0' ('^%s')", vstr, ver.Major()+1, vstr)
+	msg.Info(" - Tracking patch version releases would use '>= %s, < %d.%d.0' ('~%s')", vstr, ver.Major(), ver.Minor()+1, vstr)
+	msg.Info(" - Skip using ranges\n")
+	msg.Info("For more information on Glide versions and ranges see https://glide.sh/docs/versions")
 	msg.Info("Minor (M), Patch (P), or Skip Ranges (S)?")
+
 	res, err := msg.PromptUntil([]string{"minor", "m", "patch", "p", "skip ranges", "s"})
 	if err != nil {
 		msg.Die("Error processing response: %s", err)

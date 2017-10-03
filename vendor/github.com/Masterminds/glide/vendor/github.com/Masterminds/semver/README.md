@@ -7,7 +7,9 @@ The `semver` package provides the ability to work with [Semantic Versions](http:
 * Check if a semantic version fits within a set of constraints
 * Optionally work with a `v` prefix
 
-[![Build Status](https://travis-ci.org/Masterminds/semver.svg)](https://travis-ci.org/Masterminds/semver) [![Build status](https://ci.appveyor.com/api/projects/status/jfk66lib7hb985k8/branch/master?svg=true&passingText=windows%20build%20passing&failingText=windows%20build%20failing)](https://ci.appveyor.com/project/mattfarina/semver/branch/master) [![GoDoc](https://godoc.org/github.com/Masterminds/semver?status.png)](https://godoc.org/github.com/Masterminds/semver) [![Go Report Card](https://goreportcard.com/badge/github.com/Masterminds/semver)](https://goreportcard.com/report/github.com/Masterminds/semver)
+[![Stability:
+Active](https://masterminds.github.io/stability/active.svg)](https://masterminds.github.io/stability/active.html)
+[![Build Status](https://travis-ci.org/Masterminds/semver.svg)](https://travis-ci.org/Masterminds/semver) [![Build status](https://ci.appveyor.com/api/projects/status/jfk66lib7hb985k8/branch/master?svg=true&passingText=windows%20build%20passing&failingText=windows%20build%20failing)](https://ci.appveyor.com/project/mattfarina/semver/branch/master) [![GoDoc](https://godoc.org/github.com/Masterminds/semver?status.svg)](https://godoc.org/github.com/Masterminds/semver) [![Go Report Card](https://goreportcard.com/badge/github.com/Masterminds/semver)](https://goreportcard.com/report/github.com/Masterminds/semver)
 
 ## Parsing Semantic Versions
 
@@ -77,6 +79,15 @@ The basic comparisons are:
 * `<`: less than
 * `>=`: greater than or equal to
 * `<=`: less than or equal to
+
+_Note, according to the Semantic Version specification pre-releases may not be
+API compliant with their release counterpart. It says,_
+
+> _A pre-release version indicates that the version is unstable and might not satisfy the intended compatibility requirements as denoted by its associated normal version._
+
+_SemVer comparisons without a pre-release value will skip pre-release versions.
+For example, `>1.2.3` will skip pre-releases when looking at a list of values
+while `>1.2.3-alpha.1` will evaluate pre-releases._
 
 ## Hyphen Range Comparisons
 

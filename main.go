@@ -24,7 +24,6 @@ var (
 
 func init() {
 	flag.StringVar(&glideYaml, "yaml", gpath.DefaultGlideFile, "Set a YAML configuration file")
-	flag.BoolVar(&argVerbose, "verbose", false, "Print more verbose informational messages")
 	flag.BoolVar(&argDebug, "debug", false, "Print debug verbose informational messages")
 	flag.BoolVar(&argQuiet, "quiet", false, "Quiet (no info or debug messages)")
 }
@@ -32,16 +31,15 @@ func init() {
 func main() {
 	flag.Parse()
 
-	action.Verbose(argVerbose)
 	action.Debug(argDebug)
 	action.Quiet(argQuiet)
 	gpath.GlideFile = glideYaml
 
 	// load package from glide.yml config
-	msg.Verbose("Loading Glide config from %s...", glideYaml)
+	msg.Debug("Loading Glide config from %s...", glideYaml)
 	glideConfig := loadGlideConfig()
 
-	msg.Verbose("Collecting imported packages...")
+	msg.Debug("Collecting imported packages...")
 	importPkgs := make(map[string]interface{})
 	err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
@@ -81,7 +79,7 @@ func main() {
 		msg.Die(err.Error())
 	}
 
-	msg.Verbose("Checking unused packages...")
+	msg.Debug("Checking unused packages...")
 	unusedPkgs := make(map[string]interface{})
 gi:
 	for _, dep := range glideConfig.Imports {
@@ -107,7 +105,7 @@ gi:
 		os.Exit(0)
 	}
 
-	msg.Verbose("Removing unused packages...")
+	msg.Debug("Removing unused packages...")
 	deps := make([]*cfg.Dependency, 0, len(glideConfig.Imports))
 	for _, pkg := range glideConfig.Imports {
 		if _, unused := unusedPkgs[pkg.Name]; !unused {
