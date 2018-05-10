@@ -1,10 +1,10 @@
 hash: 3602a894eb3ec1e8ecfd1dd02c1661c71dfd9f63c5d9f00d3a0819fcaaa50456
-updated: 2017-10-03T11:45:11.116168097+07:00
+updated: 2018-05-10T11:36:40.892638+07:00
 imports:
 - name: github.com/codegangsta/cli
   version: cfb38830724cc34fedffe9a2a29fb54fa9169cd1
 - name: github.com/Masterminds/glide
-  version: a88a9a6c4eeaac084a90a0cd2ca8a148cbd3ff63
+  version: 67790b3dbede72cfdc54aa53be4706322c9499e0
   subpackages:
   - action
   - cache
@@ -23,7 +23,7 @@ imports:
   - tree
   - util
 - name: github.com/Masterminds/semver
-  version: 517734cc7d6470c0d07130e40fd40bdeb9bcd3fd
+  version: c7af12943936e8c39859482e61f0574c2fd7fc75
 - name: github.com/Masterminds/vcs
   version: 6f1c6d150500e452704e9863f68c2559f58616bf
 - name: github.com/mitchellh/go-homedir
